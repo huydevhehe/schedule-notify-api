@@ -1,6 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:dio/dio.dart';
 import 'package:app/features/auth/data/auth_api.dart';
 import 'package:app/features/auth/data/auth_repository.dart';
 import 'package:app/features/auth/domain/token_storage.dart';
