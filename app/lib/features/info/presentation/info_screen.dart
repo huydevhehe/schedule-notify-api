@@ -5,6 +5,22 @@ class InfoScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(body: Center(key: Key('info_screen'), child: Text('Thông tin')));
+    return Scaffold(
+      appBar: AppBar(title: const Text('Thông tin')),
+      body: const Padding(
+        key: Key('info_screen'),
+        padding: EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Ứng dụng Lịch họp', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+            SizedBox(height: 8),
+            Text('Phiên bản 1.0.0'),
+            SizedBox(height: 16),
+            Text('Ứng dụng thông báo và quản lý lịch họp nội bộ.'),
+          ],
+        ),
+      ),
+    );
   }
 }
