@@ -963,8 +963,133 @@ git commit -m "feat: add meeting detail API with retrieve/update/delete and obje
 
 ---
 
+### Task 7: `/api/me/` — expose current user's role and units
+
+**Files:**
+- Modify: `backend/apps/accounts/serializers.py`
+- Modify: `backend/apps/accounts/views.py`
+- Modify: `backend/apps/accounts/urls.py`
+- Test: `backend/apps/accounts/tests/test_me_api.py`
+
+**Interfaces:**
+- Consumes: `User`, `Unit` from `apps.accounts.models`; `UnitSerializer` from Task 3.
+- Produces: `GET /api/me/` returning the current user's `id`, `username`, `role`, and nested `units` list. This is what the Flutter app calls right after login to decide whether to show admin-only UI (create/edit buttons) — added because Task 3's login endpoint only returns JWT tokens, not role/unit info, which left the client with no way to know the user's role.
+
+- [ ] **Step 1: Write the failing test**
+
+```python
+# backend/apps/accounts/tests/test_me_api.py
+from django.urls import reverse
+from rest_framework.test import APITestCase
+from rest_framework import status
+from apps.accounts.models import Unit, User
+
+
+class MeApiTest(APITestCase):
+    def setUp(self):
+        self.vttp = Unit.objects.create(name="VTTP", code="VTTP")
+        self.admin = User.objects.create_user(
+            username="thao", password="pass1234", role=User.Role.ADMIN
+        )
+        self.admin.units.add(self.vttp)
+
+    def test_requires_authentication(self):
+        response = self.client.get(reverse("me"))
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_returns_current_user_role_and_units(self):
+        self.client.force_authenticate(user=self.admin)
+        response = self.client.get(reverse("me"))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["username"], "thao")
+        self.assertEqual(response.data["role"], "admin")
+        self.assertEqual(len(response.data["units"]), 1)
+        self.assertEqual(response.data["units"][0]["code"], "VTTP")
+```
+
+- [ ] **Step 2: Run test to verify it fails**
+
+Run: `python manage.py test apps.accounts.tests.test_me_api`
+Expected: FAIL — `NoReverseMatch: Reverse for 'me' not found`
+
+- [ ] **Step 3: Add `MeSerializer` to `apps/accounts/serializers.py`**
+
+```python
+# append to backend/apps/accounts/serializers.py
+from apps.accounts.models import User
+
+
+class MeSerializer(serializers.ModelSerializer):
+    units = UnitSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = User
+        fields = ["id", "username", "role", "units"]
+```
+
+- [ ] **Step 4: Add `MeView` to `apps/accounts/views.py`**
+
+```python
+# append to backend/apps/accounts/views.py
+from rest_framework import generics
+from apps.accounts.serializers import MeSerializer
+
+
+class MeView(generics.RetrieveAPIView):
+    serializer_class = MeSerializer
+
+    def get_object(self):
+        return self.request.user
+```
+
+- [ ] **Step 5: Add the route to `apps/accounts/urls.py`**
+
+```python
+from django.urls import path
+from apps.accounts.views import UnitListView, MeView
+
+urlpatterns = [
+    path("", UnitListView.as_view(), name="unit-list"),
+]
+```
+
+Then update `config/urls.py` to add a separate `/api/me/` route (it must not live under the `/api/units/` prefix):
+
+```python
+# config/urls.py — add this import and path
+from apps.accounts.views import MeView
+
+urlpatterns = [
+    path("admin/", admin.site.urls),
+    path("api/auth/login/", TokenObtainPairView.as_view(), name="token_obtain_pair"),
+    path("api/auth/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
+    path("api/me/", MeView.as_view(), name="me"),
+    path("api/units/", include("apps.accounts.urls")),
+    path("api/meetings/", include("apps.meetings.urls")),
+]
+```
+
+- [ ] **Step 6: Run tests to verify they pass**
+
+Run: `python manage.py test apps.accounts`
+Expected: `Ran 8 tests in ...s\n\nOK`
+
+- [ ] **Step 7: Run the full test suite**
+
+Run: `python manage.py test`
+Expected: `Ran 19 tests in ...s\n\nOK`
+
+- [ ] **Step 8: Commit**
+
+```bash
+git add apps/accounts/ config/urls.py
+git commit -m "feat: add /api/me/ endpoint exposing current user's role and units"
+```
+
+---
+
 ## Self-Review Notes
 
-- **Spec coverage:** Login (Task 3), Units list scoped to user (Task 3), Meeting CRUD scoped to unit with admin-only write (Tasks 5-6) all covered. DeviceToken/FCM, UserSetting, and deployment are explicitly out of scope per Global Constraints — follow-up plans.
-- **Type consistency:** `IsUnitAdminForWrite` name matches between Task 5 (created) and Task 6 (extended) — no drift. `MeetingSerializer` fields match `Meeting` model fields from Task 4 exactly.
+- **Spec coverage:** Login (Task 3), Units list scoped to user (Task 3), Meeting CRUD scoped to unit with admin-only write (Tasks 5-6), current-user role/units lookup (Task 7) all covered. DeviceToken/FCM, UserSetting, and deployment are explicitly out of scope per Global Constraints — follow-up plans.
+- **Type consistency:** `IsUnitAdminForWrite` name matches between Task 5 (created) and Task 6 (extended) — no drift. `MeetingSerializer` fields match `Meeting` model fields from Task 4 exactly. `MeSerializer` reuses `UnitSerializer` from Task 3 rather than redefining unit fields.
 - **No placeholders:** every step has complete runnable code and exact test/command lines.
