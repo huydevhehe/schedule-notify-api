@@ -71,3 +71,53 @@ class MeetingListCreateApiTest(APITestCase):
         }
         response = self.client.post(reverse("meeting-list-create"), payload, format="json")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+
+class MeetingDetailApiTest(APITestCase):
+    def setUp(self):
+        self.vttp = Unit.objects.create(name="VTTP", code="VTTP")
+        self.admin = User.objects.create_user(
+            username="thao", password="pass1234", role=User.Role.ADMIN
+        )
+        self.admin.units.add(self.vttp)
+        self.employee = User.objects.create_user(
+            username="nhan_vien", password="pass1234", role=User.Role.EMPLOYEE
+        )
+        self.employee.units.add(self.vttp)
+
+        start = timezone.now()
+        end = start + timezone.timedelta(hours=1)
+        self.meeting = Meeting.objects.create(
+            title="Họp VTTP", start_time=start, end_time=end,
+            location="Online", unit=self.vttp, created_by=self.admin,
+        )
+
+    def test_employee_can_read_detail(self):
+        self.client.force_authenticate(user=self.employee)
+        response = self.client.get(reverse("meeting-detail", args=[self.meeting.id]))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["title"], "Họp VTTP")
+
+    def test_employee_cannot_update(self):
+        self.client.force_authenticate(user=self.employee)
+        response = self.client.patch(
+            reverse("meeting-detail", args=[self.meeting.id]),
+            {"title": "Đổi tên"}, format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_admin_can_update(self):
+        self.client.force_authenticate(user=self.admin)
+        response = self.client.patch(
+            reverse("meeting-detail", args=[self.meeting.id]),
+            {"title": "Đổi tên"}, format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.meeting.refresh_from_db()
+        self.assertEqual(self.meeting.title, "Đổi tên")
+
+    def test_admin_can_delete(self):
+        self.client.force_authenticate(user=self.admin)
+        response = self.client.delete(reverse("meeting-detail", args=[self.meeting.id]))
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertFalse(Meeting.objects.filter(id=self.meeting.id).exists())

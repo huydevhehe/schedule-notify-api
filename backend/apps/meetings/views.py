@@ -17,3 +17,11 @@ class MeetingListCreateView(generics.ListCreateAPIView):
 
     def perform_create(self, serializer):
         serializer.save(created_by=self.request.user)
+
+
+class MeetingDetailView(generics.RetrieveUpdateDestroyAPIView):
+    serializer_class = MeetingSerializer
+    permission_classes = [IsUnitAdminForWrite]
+
+    def get_queryset(self):
+        return Meeting.objects.filter(unit__in=self.request.user.units.all())
