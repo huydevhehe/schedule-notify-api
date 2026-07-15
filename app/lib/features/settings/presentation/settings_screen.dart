@@ -10,11 +10,26 @@ const _fontSizeLabels = {
   FontSizeOption.large: 'Lớn',
 };
 
-class SettingsScreen extends ConsumerWidget {
+class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<SettingsScreen> createState() => _SettingsScreenState();
+}
+
+class _SettingsScreenState extends ConsumerState<SettingsScreen> {
+  late final _keywordController = TextEditingController(
+    text: ref.read(settingsControllerProvider).highlightKeyword,
+  );
+
+  @override
+  void dispose() {
+    _keywordController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final settings = ref.watch(settingsControllerProvider);
     final controller = ref.read(settingsControllerProvider.notifier);
 
@@ -27,7 +42,7 @@ class SettingsScreen extends ConsumerWidget {
           TextField(
             key: const Key('highlight_keyword_field'),
             decoration: const InputDecoration(labelText: 'Từ khóa highlight'),
-            controller: TextEditingController(text: settings.highlightKeyword),
+            controller: _keywordController,
             onSubmitted: controller.setHighlightKeyword,
           ),
           const SizedBox(height: 16),
