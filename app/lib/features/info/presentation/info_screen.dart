@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:app/core/widgets/gradient_app_bar.dart';
 
 class InfoScreen extends StatelessWidget {
   const InfoScreen({super.key});
@@ -6,7 +7,7 @@ class InfoScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Thông tin')),
+      appBar: const GradientAppBar(title: 'Thông tin'),
       body: const Padding(
         key: Key('info_screen'),
         padding: EdgeInsets.all(16),
