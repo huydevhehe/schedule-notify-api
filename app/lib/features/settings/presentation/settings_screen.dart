@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:app/core/widgets/gradient_app_bar.dart';
 import 'package:app/features/auth/presentation/auth_controller.dart';
 import 'package:app/features/settings/data/settings_repository.dart';
 import 'package:app/features/settings/presentation/settings_controller.dart';
@@ -8,6 +9,12 @@ const _fontSizeLabels = {
   FontSizeOption.small: 'Nhỏ',
   FontSizeOption.medium: 'Vừa',
   FontSizeOption.large: 'Lớn',
+};
+
+const _themeModeLabels = {
+  ThemeMode.light: 'Sáng',
+  ThemeMode.dark: 'Tối',
+  ThemeMode.system: 'Theo hệ thống',
 };
 
 class SettingsScreen extends ConsumerStatefulWidget {
@@ -34,7 +41,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final controller = ref.read(settingsControllerProvider.notifier);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Cài đặt')),
+      appBar: const GradientAppBar(title: 'Cài đặt'),
       body: ListView(
         key: const Key('settings_screen'),
         padding: const EdgeInsets.all(16),
@@ -61,6 +68,24 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         style: TextStyle(fontSize: 14 + option.index * 4),
                       ),
                       value: option,
+                    ),
+                  )
+                  .toList(),
+            ),
+          ),
+          const SizedBox(height: 16),
+          const Text('Giao diện:'),
+          RadioGroup<ThemeMode>(
+            groupValue: settings.themeMode,
+            onChanged: (value) {
+              if (value != null) controller.setThemeMode(value);
+            },
+            child: Column(
+              children: ThemeMode.values
+                  .map(
+                    (mode) => RadioListTile<ThemeMode>(
+                      title: Text(_themeModeLabels[mode]!),
+                      value: mode,
                     ),
                   )
                   .toList(),

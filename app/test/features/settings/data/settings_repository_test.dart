@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:app/features/settings/data/settings_repository.dart';
@@ -24,5 +25,18 @@ void main() {
 
     expect(repo.readFontSize(), FontSizeOption.large);
     expect(repo.readHighlightKeyword(), 'khẩn');
+  });
+
+  test('defaults to system theme mode', () async {
+    final prefs = await SharedPreferences.getInstance();
+    final repo = SettingsRepository(prefs);
+    expect(repo.readThemeMode(), ThemeMode.system);
+  });
+
+  test('save persists theme mode', () async {
+    final prefs = await SharedPreferences.getInstance();
+    final repo = SettingsRepository(prefs);
+    await repo.saveThemeMode(ThemeMode.dark);
+    expect(repo.readThemeMode(), ThemeMode.dark);
   });
 }

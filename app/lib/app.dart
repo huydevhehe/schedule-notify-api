@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:app/core/theme/app_theme.dart';
+import 'package:app/features/settings/presentation/settings_controller.dart';
 import 'package:app/router.dart';
 
 class App extends ConsumerWidget {
@@ -8,9 +10,12 @@ class App extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final router = ref.watch(routerProvider);
+    final themeMode = ref.watch(settingsControllerProvider).themeMode;
     return MaterialApp.router(
       title: 'Lịch họp',
-      theme: ThemeData(colorSchemeSeed: Colors.blue, useMaterial3: true),
+      theme: AppTheme.light(),
+      darkTheme: AppTheme.dark(),
+      themeMode: themeMode,
       routerConfig: router,
     );
   }
