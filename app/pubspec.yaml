@@ -39,6 +39,9 @@ dependencies:
   dio: ^5.10.0
   flutter_secure_storage: ^10.3.1
   shared_preferences: ^2.5.5
+  google_fonts: ^8.2.0
+  table_calendar: ^3.2.0
+  intl: ^0.20.3
 
 dev_dependencies:
   flutter_test:
