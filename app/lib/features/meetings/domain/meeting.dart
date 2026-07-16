@@ -11,6 +11,7 @@ class Meeting {
     required this.note,
     required this.isImportant,
     required this.unitId,
+    this.createdAt,
   });
 
   final int id;
@@ -24,6 +25,7 @@ class Meeting {
   final String note;
   final bool isImportant;
   final int unitId;
+  final DateTime? createdAt;
 
   factory Meeting.fromJson(Map<String, dynamic> json) => Meeting(
         id: json['id'] as int,
@@ -37,6 +39,9 @@ class Meeting {
         note: json['note'] as String? ?? '',
         isImportant: json['is_important'] as bool? ?? false,
         unitId: json['unit'] as int,
+        createdAt: json['created_at'] != null
+            ? DateTime.parse(json['created_at'] as String)
+            : null,
       );
 }
 

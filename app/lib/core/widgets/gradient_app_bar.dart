@@ -8,17 +8,21 @@ class GradientAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.subtitle,
     this.actions,
     this.bottom,
+    this.leading,
   });
 
   final String title;
   final String? subtitle;
   final List<Widget>? actions;
   final PreferredSizeWidget? bottom;
+  final Widget? leading;
 
   @override
   Widget build(BuildContext context) {
     return AppBar(
       automaticallyImplyLeading: false,
+      leading: leading,
+      iconTheme: const IconThemeData(color: Colors.white),
       backgroundColor: Colors.transparent,
       surfaceTintColor: Colors.transparent,
       elevation: 0,

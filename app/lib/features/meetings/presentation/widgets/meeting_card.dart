@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:app/core/theme/app_colors.dart';
 import 'package:app/features/meetings/domain/meeting.dart';
+import 'package:app/features/settings/presentation/settings_controller.dart';
 
-class MeetingCard extends StatelessWidget {
+class MeetingCard extends ConsumerWidget {
   const MeetingCard({
     super.key,
     required this.meeting,
@@ -22,7 +24,9 @@ class MeetingCard extends StatelessWidget {
   final VoidCallback? onDelete;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final settings = ref.watch(settingsControllerProvider);
+    final keyword = settings.highlightKeyword.trim();
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final accent =
         meeting.isImportant ? AppColors.important : Theme.of(context).colorScheme.primary;
@@ -69,21 +73,72 @@ class MeetingCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 8),
-            Text(
-              meeting.title,
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: accent),
+            Text.rich(
+              _highlightSpan(
+                meeting.title,
+                keyword,
+                TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: accent),
+              ),
             ),
             const SizedBox(height: 8),
-            _Field(label: 'Chủ trì', value: meeting.host),
-            _Field(label: 'Chuẩn bị', value: meeting.preparation),
-            _Field(label: 'Thành phần', value: meeting.participants),
-            _Field(label: 'Địa điểm', value: meeting.location),
-            if (meeting.note.isNotEmpty) _Field(label: 'Ghi chú', value: meeting.note),
+            _Field(label: 'Chủ trì', value: meeting.host, keyword: keyword),
+            _Field(label: 'Chuẩn bị', value: meeting.preparation, keyword: keyword),
+            _Field(label: 'Thành phần', value: meeting.participants, keyword: keyword),
+            _Field(label: 'Địa điểm', value: meeting.location, keyword: keyword),
+            if (meeting.note.isNotEmpty)
+              _Field(label: 'Ghi chú', value: meeting.note, keyword: keyword),
+            if (settings.showCreatedDate && meeting.createdAt != null)
+              Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: Text(
+                  'Ngày tạo: ${DateFormat('dd/MM/yyyy').format(meeting.createdAt!)}',
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontStyle: FontStyle.italic,
+                    color: Theme.of(context).hintColor,
+                  ),
+                ),
+              ),
           ],
         ),
       ),
     );
   }
+}
+
+/// Dựng TextSpan tô nền vàng nhạt + đậm cho các đoạn trùng [keyword]
+/// (không phân biệt hoa/thường). Nếu keyword rỗng, trả về text thường.
+TextSpan _highlightSpan(String text, String keyword, TextStyle baseStyle) {
+  if (keyword.isEmpty || text.isEmpty) {
+    return TextSpan(text: text, style: baseStyle);
+  }
+
+  final lowerText = text.toLowerCase();
+  final lowerKeyword = keyword.toLowerCase();
+  final spans = <TextSpan>[];
+  var start = 0;
+
+  while (true) {
+    final index = lowerText.indexOf(lowerKeyword, start);
+    if (index < 0) {
+      spans.add(TextSpan(text: text.substring(start), style: baseStyle));
+      break;
+    }
+    if (index > start) {
+      spans.add(TextSpan(text: text.substring(start, index), style: baseStyle));
+    }
+    spans.add(TextSpan(
+      text: text.substring(index, index + keyword.length),
+      style: baseStyle.copyWith(
+        fontWeight: FontWeight.bold,
+        backgroundColor: const Color(0xFFFFF176),
+        color: Colors.black,
+      ),
+    ));
+    start = index + keyword.length;
+  }
+
+  return TextSpan(children: spans);
 }
 
 class _IconBadge extends StatelessWidget {
@@ -104,22 +159,24 @@ class _IconBadge extends StatelessWidget {
 }
 
 class _Field extends StatelessWidget {
-  const _Field({required this.label, required this.value});
+  const _Field({required this.label, required this.value, required this.keyword});
 
   final String label;
   final String value;
+  final String keyword;
 
   @override
   Widget build(BuildContext context) {
     if (value.isEmpty) return const SizedBox.shrink();
+    final baseStyle = DefaultTextStyle.of(context).style.copyWith(fontSize: 12.5);
     return Padding(
       padding: const EdgeInsets.only(bottom: 4),
       child: Text.rich(
         TextSpan(
-          style: DefaultTextStyle.of(context).style.copyWith(fontSize: 12.5),
+          style: baseStyle,
           children: [
             TextSpan(text: '$label: ', style: const TextStyle(fontWeight: FontWeight.bold)),
-            TextSpan(text: value),
+            _highlightSpan(value, keyword, baseStyle),
           ],
         ),
       ),

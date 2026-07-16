@@ -10,6 +10,7 @@ class SettingsRepository {
   static const _fontSizeKey = 'font_size';
   static const _keywordKey = 'highlight_keyword';
   static const _themeModeKey = 'theme_mode';
+  static const _showCreatedDateKey = 'show_created_date';
 
   FontSizeOption readFontSize() {
     final stored = _prefs.getString(_fontSizeKey);
@@ -34,4 +35,9 @@ class SettingsRepository {
   }
 
   Future<void> saveThemeMode(ThemeMode mode) => _prefs.setString(_themeModeKey, mode.name);
+
+  bool readShowCreatedDate() => _prefs.getBool(_showCreatedDateKey) ?? true;
+
+  Future<void> saveShowCreatedDate(bool value) =>
+      _prefs.setBool(_showCreatedDateKey, value);
 }

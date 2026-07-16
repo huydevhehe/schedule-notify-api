@@ -46,58 +46,133 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         key: const Key('settings_screen'),
         padding: const EdgeInsets.all(16),
         children: [
-          TextField(
-            key: const Key('highlight_keyword_field'),
-            decoration: const InputDecoration(labelText: 'Từ khóa highlight'),
-            controller: _keywordController,
-            onSubmitted: controller.setHighlightKeyword,
+          _SettingsCard(
+            title: 'Từ khóa highlight',
+            children: [
+              TextField(
+                key: const Key('highlight_keyword_field'),
+                decoration: const InputDecoration(
+                  hintText: 'VD: quan trọng, gấp...',
+                  helperText: 'Từ trùng sẽ được tô màu trong nội dung lịch',
+                ),
+                controller: _keywordController,
+                onChanged: controller.setHighlightKeyword,
+              ),
+            ],
           ),
-          const SizedBox(height: 16),
-          const Text('Cỡ chữ nội dung lịch:'),
-          RadioGroup<FontSizeOption>(
-            groupValue: settings.fontSize,
-            onChanged: (value) {
-              if (value != null) controller.setFontSize(value);
-            },
-            child: Column(
-              children: FontSizeOption.values
-                  .map(
-                    (option) => RadioListTile<FontSizeOption>(
-                      title: Text(
-                        _fontSizeLabels[option]!,
-                        style: TextStyle(fontSize: 14 + option.index * 4),
-                      ),
-                      value: option,
-                    ),
-                  )
-                  .toList(),
-            ),
+          _SettingsCard(
+            title: 'Cỡ chữ nội dung lịch',
+            children: [
+              Slider(
+                key: const Key('font_size_slider'),
+                value: settings.fontSize.index.toDouble(),
+                min: 0,
+                max: (FontSizeOption.values.length - 1).toDouble(),
+                divisions: FontSizeOption.values.length - 1,
+                label: _fontSizeLabels[settings.fontSize],
+                onChanged: (value) =>
+                    controller.setFontSize(FontSizeOption.values[value.round()]),
+              ),
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 8),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('Nhỏ'),
+                    Text('Vừa'),
+                    Text('Lớn'),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 12),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  'Chữ mẫu xem trước cỡ chữ',
+                  style: TextStyle(fontSize: 14 + settings.fontSize.index * 4),
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 16),
-          const Text('Giao diện:'),
-          RadioGroup<ThemeMode>(
-            groupValue: settings.themeMode,
-            onChanged: (value) {
-              if (value != null) controller.setThemeMode(value);
-            },
-            child: Column(
-              children: ThemeMode.values
-                  .map(
-                    (mode) => RadioListTile<ThemeMode>(
-                      title: Text(_themeModeLabels[mode]!),
-                      value: mode,
-                    ),
-                  )
-                  .toList(),
-            ),
+          _SettingsCard(
+            title: 'Hiển thị',
+            children: [
+              SwitchListTile(
+                key: const Key('show_created_date_switch'),
+                contentPadding: EdgeInsets.zero,
+                title: const Text('Hiện ngày tạo lịch'),
+                subtitle: const Text('Hiển thị ngày tạo ở cuối mỗi cuộc họp'),
+                value: settings.showCreatedDate,
+                onChanged: controller.setShowCreatedDate,
+              ),
+            ],
           ),
-          const SizedBox(height: 24),
-          FilledButton(
+          _SettingsCard(
+            title: 'Giao diện',
+            children: [
+              RadioGroup<ThemeMode>(
+                groupValue: settings.themeMode,
+                onChanged: (value) {
+                  if (value != null) controller.setThemeMode(value);
+                },
+                child: Column(
+                  children: ThemeMode.values
+                      .map(
+                        (mode) => RadioListTile<ThemeMode>(
+                          contentPadding: EdgeInsets.zero,
+                          title: Text(_themeModeLabels[mode]!),
+                          value: mode,
+                        ),
+                      )
+                      .toList(),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          FilledButton.icon(
             key: const Key('logout_button'),
             onPressed: () => ref.read(authControllerProvider.notifier).logout(),
-            child: const Text('Đăng xuất'),
+            icon: const Icon(Icons.logout),
+            label: const Text('Đăng xuất'),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _SettingsCard extends StatelessWidget {
+  const _SettingsCard({required this.title, required this.children});
+
+  final String title;
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      margin: const EdgeInsets.only(bottom: 16),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              title,
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+            ),
+            const SizedBox(height: 8),
+            ...children,
+          ],
+        ),
       ),
     );
   }

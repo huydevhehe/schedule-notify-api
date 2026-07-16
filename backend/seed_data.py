@@ -10,8 +10,11 @@ from django.utils import timezone
 import datetime
 
 unit, _ = Unit.objects.get_or_create(code="VTTP", defaults={"name": "VTTP"})
+nsg_unit, _ = Unit.objects.get_or_create(
+    code="NSG", defaults={"name": "VNPT Nam Sài Gòn"}
+)
 admin = User.objects.get(username="admin")
-admin.units.add(unit)
+admin.units.add(unit, nsg_unit)
 
 if not Meeting.objects.filter(unit=unit).exists():
     start = timezone.now().replace(hour=9, minute=0, second=0, microsecond=0)

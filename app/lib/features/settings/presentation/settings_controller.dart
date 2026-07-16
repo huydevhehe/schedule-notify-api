@@ -8,10 +8,26 @@ class SettingsState {
     required this.fontSize,
     required this.highlightKeyword,
     required this.themeMode,
+    required this.showCreatedDate,
   });
   final FontSizeOption fontSize;
   final String highlightKeyword;
   final ThemeMode themeMode;
+  final bool showCreatedDate;
+
+  SettingsState copyWith({
+    FontSizeOption? fontSize,
+    String? highlightKeyword,
+    ThemeMode? themeMode,
+    bool? showCreatedDate,
+  }) {
+    return SettingsState(
+      fontSize: fontSize ?? this.fontSize,
+      highlightKeyword: highlightKeyword ?? this.highlightKeyword,
+      themeMode: themeMode ?? this.themeMode,
+      showCreatedDate: showCreatedDate ?? this.showCreatedDate,
+    );
+  }
 }
 
 final settingsControllerProvider =
@@ -26,33 +42,27 @@ class SettingsController extends Notifier<SettingsState> {
       fontSize: _repo.readFontSize(),
       highlightKeyword: _repo.readHighlightKeyword(),
       themeMode: _repo.readThemeMode(),
+      showCreatedDate: _repo.readShowCreatedDate(),
     );
   }
 
   Future<void> setFontSize(FontSizeOption option) async {
     await _repo.saveFontSize(option);
-    state = SettingsState(
-      fontSize: option,
-      highlightKeyword: state.highlightKeyword,
-      themeMode: state.themeMode,
-    );
+    state = state.copyWith(fontSize: option);
   }
 
   Future<void> setHighlightKeyword(String keyword) async {
     await _repo.saveHighlightKeyword(keyword);
-    state = SettingsState(
-      fontSize: state.fontSize,
-      highlightKeyword: keyword,
-      themeMode: state.themeMode,
-    );
+    state = state.copyWith(highlightKeyword: keyword);
   }
 
   Future<void> setThemeMode(ThemeMode mode) async {
     await _repo.saveThemeMode(mode);
-    state = SettingsState(
-      fontSize: state.fontSize,
-      highlightKeyword: state.highlightKeyword,
-      themeMode: mode,
-    );
+    state = state.copyWith(themeMode: mode);
+  }
+
+  Future<void> setShowCreatedDate(bool value) async {
+    await _repo.saveShowCreatedDate(value);
+    state = state.copyWith(showCreatedDate: value);
   }
 }
