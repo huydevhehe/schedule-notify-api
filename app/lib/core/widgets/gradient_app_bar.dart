@@ -22,8 +22,10 @@ class GradientAppBar extends StatelessWidget implements PreferredSizeWidget {
       backgroundColor: Colors.transparent,
       surfaceTintColor: Colors.transparent,
       elevation: 0,
-      flexibleSpace: const DecoratedBox(
-        decoration: BoxDecoration(gradient: AppColors.primaryGradient),
+      flexibleSpace: const SizedBox.expand(
+        child: DecoratedBox(
+          decoration: BoxDecoration(gradient: AppColors.primaryGradient),
+        ),
       ),
       title: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
