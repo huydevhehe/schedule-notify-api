@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:app/core/theme/app_colors.dart';
 
 class WeekDaySelector extends StatelessWidget implements PreferredSizeWidget {
   const WeekDaySelector({super.key, required this.selectedDate, required this.onDateSelected});
@@ -15,6 +16,7 @@ class WeekDaySelector extends StatelessWidget implements PreferredSizeWidget {
     final today = DateTime.now();
 
     return Container(
+      color: AppColors.primaryDark,
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
         children: [
@@ -44,7 +46,7 @@ class WeekDaySelector extends StatelessWidget implements PreferredSizeWidget {
                         _dayLabels[i],
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          color: Colors.white.withValues(alpha: (isSelected || isToday) ? 1 : 0.7),
+                          color: Colors.white.withValues(alpha: (isSelected || isToday) ? 1 : 0.85),
                           fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                           fontSize: 11,
                         ),
