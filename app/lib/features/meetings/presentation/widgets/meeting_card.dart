@@ -23,10 +23,12 @@ class MeetingCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final accent =
         meeting.isImportant ? AppColors.important : Theme.of(context).colorScheme.primary;
-    final badgeBg =
-        meeting.isImportant ? AppColors.importantBgLight : AppColors.iconBadgeLight;
+    final badgeBg = meeting.isImportant
+        ? (isDark ? AppColors.importantBgDark : AppColors.importantBgLight)
+        : (isDark ? AppColors.iconBadgeDark : AppColors.iconBadgeLight);
 
     return Card(
       child: Padding(

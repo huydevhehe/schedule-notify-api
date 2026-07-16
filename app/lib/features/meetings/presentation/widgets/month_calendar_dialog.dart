@@ -28,6 +28,7 @@ class _MonthCalendarDialogState extends State<MonthCalendarDialog> {
         padding: const EdgeInsets.all(8),
         child: TableCalendar(
           key: const Key('month_calendar'),
+          locale: 'vi_VN',
           firstDay: DateTime(2020, 1, 1),
           lastDay: DateTime(2035, 12, 31),
           focusedDay: _focusedDay,

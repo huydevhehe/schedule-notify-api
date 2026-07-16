@@ -45,7 +45,7 @@ class _MeetingsListScreenState extends ConsumerState<MeetingsListScreen> {
     return Scaffold(
       appBar: GradientAppBar(
         title: 'Lịch họp',
-        subtitle: DateFormat('EEEE, dd/MM/yyyy').format(selectedDate),
+        subtitle: DateFormat('EEEE, dd/MM/yyyy', 'vi_VN').format(selectedDate),
         bottom: _isSearching
             ? PreferredSize(
                 preferredSize: const Size.fromHeight(56),
